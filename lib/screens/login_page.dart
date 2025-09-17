@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'register_page.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
+import 'admin_dashboard.dart';
+import 'donor_dashboard.dart';
+import 'ngo_dashboard.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -31,13 +35,32 @@ class _LoginPageState extends State<LoginPage> {
       final token = result["token"];
       print("✅ Logged in, token: $token");
 
-      // Save token for later use (API calls)
+      // Decode JWT
+      Map<String, dynamic> decoded = JwtDecoder.decode(token);
+      String role = decoded["role"];
+      print("🔑 Role: $role");
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login success: ${result.toString()}")),
-      );
-
-      // TODO: Navigate to role-based home page
+      // Navigate based on role
+      if (role == "ADMIN") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => AdminDashboard(token: token)),
+        );
+      } else if (role == "DONOR") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => DonorDashboard(token: token)),
+        );
+      } else if (role == "NGO") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => NgoDashboard(token: token)),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Unknown role")));
+      }
     } catch (e) {
       ScaffoldMessenger.of(
         context,

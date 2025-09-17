@@ -116,7 +116,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 // Dropdown for role
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   decoration: const InputDecoration(
                     labelText: "Select Role",
                     border: OutlineInputBorder(),
