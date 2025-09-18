@@ -120,4 +120,120 @@ class ApiService {
       throw Exception("Failed to load notifications: ${response.body}");
     }
   }
+
+  /// =============== VOLUNTEER ENDPOINTS =================
+
+  // 🔹 Get available donations for volunteer
+  Future<List<dynamic>> getAvailableDonations(
+    String token,
+    int volunteerId,
+  ) async {
+    final url = "$baseUrl/ShareBite/volunteer/$volunteerId/available-donations";
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    print("GET $url -> ${response.statusCode} : ${response.body}");
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception(
+        "Failed to load donations [${response.statusCode}]: ${response.body}",
+      );
+    }
+  }
+
+  // 🔹 Claim a donation
+  Future<void> claimDonation(
+    String token,
+    int volunteerId,
+    int donationId,
+  ) async {
+    final url = "$baseUrl/ShareBite/volunteer/$volunteerId/claim/$donationId";
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    print("POST $url -> ${response.statusCode} : ${response.body}");
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        "Failed to claim donation [${response.statusCode}]: ${response.body}",
+      );
+    }
+  }
+
+  // 🔹 Mark donation as picked up
+  Future<void> pickupDonation(String token, int assignmentId) async {
+    final url = "$baseUrl/ShareBite/volunteer/pickup/$assignmentId";
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    print("PUT $url -> ${response.statusCode} : ${response.body}");
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        "Failed to mark pickup [${response.statusCode}]: ${response.body}",
+      );
+    }
+  }
+
+  // 🔹 Mark donation as delivered
+  Future<void> deliverDonation(String token, int assignmentId) async {
+    final url = "$baseUrl/ShareBite/volunteer/deliver/$assignmentId";
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    print("PUT $url -> ${response.statusCode} : ${response.body}");
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        "Failed to mark delivered [${response.statusCode}]: ${response.body}",
+      );
+    }
+  }
+
+  // 🔹 Get volunteer assignments
+  Future<List<dynamic>> getAssignments(String token, int volunteerId) async {
+    final url = "$baseUrl/ShareBite/volunteer/assignments/$volunteerId";
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    print("GET $url -> ${response.statusCode} : ${response.body}");
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception(
+        "Failed to load assignments [${response.statusCode}]: ${response.body}",
+      );
+    }
+  }
+
+  // 🔹 Mark payment done (admin/ngo maybe)
+  Future<void> markPaymentDone(String token, int assignmentId) async {
+    final url =
+        "$baseUrl/ShareBite/volunteer/assignments/$assignmentId/payment";
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    print("PUT $url -> ${response.statusCode} : ${response.body}");
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        "Failed to mark payment [${response.statusCode}]: ${response.body}",
+      );
+    }
+  }
 }

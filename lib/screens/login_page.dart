@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_app/screens/volunteer_dashboard.dart';
 import '../services/api_service.dart';
 import 'register_page.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -33,11 +34,13 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       final token = result["token"];
+
       print("✅ Logged in, token: $token");
 
       // Decode JWT
       Map<String, dynamic> decoded = JwtDecoder.decode(token);
       String role = decoded["role"];
+      final userId = decoded["userid"];
       print("🔑 Role: $role");
 
       // Navigate based on role
@@ -55,6 +58,14 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => NgoDashboard(token: token)),
+        );
+      } else if (role == "VOLUNTEER") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                VolunteerDashboard(token: token, volunteerId: userId),
+          ),
         );
       } else {
         ScaffoldMessenger.of(
