@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_app/screens/main_drawer.dart';
 import '../services/api_service.dart';
 
 class VolunteerDashboard extends StatefulWidget {
@@ -149,6 +150,11 @@ class _VolunteerDashboardState extends State<VolunteerDashboard>
             Tab(text: "My Assignments"),
           ],
         ),
+      ),
+      drawer: MainDrawer(
+        token: widget.token,
+        role: "VOLUNTEER",
+        userId: widget.volunteerId,
       ),
       body: TabBarView(
         controller: _tabController,

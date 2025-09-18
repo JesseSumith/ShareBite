@@ -5,12 +5,19 @@ import 'login_page.dart';
 import 'admin_dashboard.dart';
 import 'donor_dashboard.dart';
 import 'ngo_dashboard.dart';
+import 'volunteer_dashboard.dart';
 
 class MainDrawer extends StatelessWidget {
   final String token;
   final String role;
+  final int? userId; // optional, only needed for volunteer
 
-  const MainDrawer({super.key, required this.token, required this.role});
+  const MainDrawer({
+    super.key,
+    required this.token,
+    required this.role,
+    this.userId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +59,23 @@ class MainDrawer extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (_) => NgoDashboard(token: token)),
                 );
+              } else if (role == "VOLUNTEER") {
+                if (userId != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => VolunteerDashboard(
+                        token: token,
+                        volunteerId: userId!,
+                      ),
+                    ),
+                  );
+                } else {
+                  // fallback if userId not provided
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Volunteer ID not provided")),
+                  );
+                }
               }
             },
           ),
