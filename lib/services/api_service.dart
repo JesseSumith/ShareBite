@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl = "http://10.27.162.242:8080"; // replace
+  final String baseUrl = "http://192.168.236.242:8080"; // replace
 
   Future<Map<String, dynamic>> login({
     required String name,
@@ -234,6 +234,104 @@ class ApiService {
       throw Exception(
         "Failed to mark payment [${response.statusCode}]: ${response.body}",
       );
+    }
+  }
+
+  // 🔹 Fetch donor's donations
+
+  Future<List<dynamic>> getDonorDonations(String token, int donorId) async {
+    final url = Uri.parse("$baseUrl/ShareBite/donations/donor/$donorId");
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception(
+        "Failed to load donor donations: ${response.statusCode} → ${response.body}",
+      );
+    }
+  }
+
+  // 🔹 NGO: Get pending donations assigned to this NGO
+  Future<List<dynamic>> getPendingDonationsForNgo(
+    String token,
+    int ngoId,
+  ) async {
+    final url = Uri.parse("$baseUrl/ShareBite/donations/ngo/$ngoId/pending");
+
+    print("➡️ GET: $url");
+
+    final response = await http.get(
+      url,
+      headers: {"Authorization": "Bearer $token"},
+    );
+
+    print("⬅️ Status: ${response.statusCode}");
+    print("⬅️ Body: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data is List) return data;
+      throw Exception("Unexpected response format: $data");
+    } else {
+      throw Exception("Failed to load donations: ${response.body}");
+    }
+  }
+
+  // 🔹 NGO: Accept a donation (robust version)
+  Future<void> acceptDonation(String token, int donationId, int ngoId) async {
+    // First attempt: query param style
+    Uri urlQuery = Uri.parse(
+      "$baseUrl/ShareBite/donations/$donationId/accept?ngoId=$ngoId",
+    );
+
+    // Second attempt: path param style (fallback)
+    Uri urlPath = Uri.parse(
+      "$baseUrl/ShareBite/donations/$donationId/accept/$ngoId",
+    );
+
+    final headers = {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    };
+
+    http.Response response;
+
+    try {
+      print("➡️ PUT (query param): $urlQuery");
+      response = await http.put(
+        urlQuery,
+        headers: headers,
+        body: jsonEncode({}),
+      );
+
+      print("⬅️ Status: ${response.statusCode}");
+      print("⬅️ Body: ${response.body}");
+
+      if (response.statusCode == 200) return; // Success
+    } catch (e) {
+      print("Query param attempt failed: $e");
+    }
+
+    // Fallback to path param style
+    try {
+      print("➡️ PUT (path param fallback): $urlPath");
+      response = await http.put(
+        urlPath,
+        headers: headers,
+        body: jsonEncode({}),
+      );
+
+      print("⬅️ Status: ${response.statusCode}");
+      print("⬅️ Body: ${response.body}");
+
+      if (response.statusCode == 200) return; // Success
+    } catch (e) {
+      print("Path param attempt failed: $e");
     }
   }
 }

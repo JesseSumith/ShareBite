@@ -4,7 +4,13 @@ import 'package:http/http.dart' as http;
 
 class DonationForm extends StatefulWidget {
   final String token;
-  const DonationForm({super.key, required this.token});
+  final int donorId; // ✅ add donorId
+
+  const DonationForm({
+    super.key,
+    required this.token,
+    required this.donorId, // ✅ make it required
+  });
 
   @override
   State<DonationForm> createState() => _DonationFormState();
@@ -45,7 +51,7 @@ class _DonationFormState extends State<DonationForm> {
             "Authorization": "Bearer ${widget.token}",
           },
           body: jsonEncode({
-            "foodDetails": foodType,
+            "foodType": foodType,
             "quantity": quantity,
             "street": street,
             "city": city,

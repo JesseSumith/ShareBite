@@ -10,13 +10,15 @@ import 'volunteer_dashboard.dart';
 class MainDrawer extends StatelessWidget {
   final String token;
   final String role;
-  final int? userId; // optional, only needed for volunteer
+  final int? userId;
+  final String? city; // ✅ added city
 
   const MainDrawer({
     super.key,
     required this.token,
     required this.role,
     this.userId,
+    this.city, // ✅ optional, only needed for NGO
   });
 
   @override
@@ -48,17 +50,38 @@ class MainDrawer extends StatelessWidget {
                   ),
                 );
               } else if (role == "DONOR") {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => DonorDashboard(token: token),
-                  ),
-                );
+                if (userId != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          DonorDashboard(token: token, donorId: userId!),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Donor ID not provided")),
+                  );
+                }
               } else if (role == "NGO") {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => NgoDashboard(token: token)),
-                );
+                if (userId != null && city != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => NgoDashboard(
+                        token: token,
+                        ngoId: userId!, // ✅ pass NGO's id
+                        city: city!, // ✅ pass NGO's city
+                      ),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("NGO ID or City not provided"),
+                    ),
+                  );
+                }
               } else if (role == "VOLUNTEER") {
                 if (userId != null) {
                   Navigator.pushReplacement(
@@ -71,7 +94,6 @@ class MainDrawer extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // fallback if userId not provided
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Volunteer ID not provided")),
                   );
