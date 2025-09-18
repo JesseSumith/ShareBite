@@ -29,21 +29,19 @@ class _NgoDashboardState extends State<NgoDashboard> {
   }
 
   Future<void> _loadDonations() async {
-    final donations = await _apiService.getDonations(
-      widget.token,
-      widget.ngoId,
-    );
-
-    // Sort: accepted donations on top
-    donations.sort((a, b) {
-      if (a.status == "accepted" && b.status != "accepted") return -1;
-      if (a.status != "accepted" && b.status == "accepted") return 1;
-      return 0; // keep relative order otherwise
-    });
-
-    setState(() {
-      _donations = donations;
-    });
+    try {
+      final donations = await _apiService.getPendingDonationsForNgo(
+        widget.token,
+        widget.ngoId,
+      );
+      setState(() {
+        _pendingDonations = Future.value(donations);
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error loading donations: $e")));
+    }
   }
 
   Future<void> _acceptDonation(int donationId) async {

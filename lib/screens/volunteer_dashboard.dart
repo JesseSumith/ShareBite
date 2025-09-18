@@ -44,17 +44,22 @@ class _VolunteerDashboardState extends State<VolunteerDashboard>
   }
 
   Future<void> _claimDonation(int donationId) async {
+    print(
+      "Attempting to claim donationId=$donationId for volunteerId=${widget.volunteerId}",
+    );
     try {
       await _apiService.claimDonation(
         widget.token,
         widget.volunteerId,
         donationId,
       );
+      print("Claim successful!");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Donation claimed successfully")),
       );
       _loadData();
     } catch (e) {
+      print("Claim failed: $e");
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Error: $e")));
