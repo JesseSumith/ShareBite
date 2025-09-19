@@ -32,7 +32,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       case "APPROVED":
         return Colors.green;
       case "REJECTED":
-        return Colors.red;
+        return Colors.redAccent;
       case "PENDING":
         return Colors.orange;
       default:
@@ -43,24 +43,29 @@ class _NotificationsPageState extends State<NotificationsPage> {
   IconData _getIcon(String type) {
     switch (type.toUpperCase()) {
       case "APPROVED":
-        return Icons.check_circle;
+        return Icons.check_circle_outline;
       case "REJECTED":
-        return Icons.cancel;
+        return Icons.cancel_outlined;
       case "PENDING":
-        return Icons.hourglass_empty;
+        return Icons.hourglass_top_rounded;
       default:
-        return Icons.notifications;
+        return Icons.notifications_active_outlined;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text("Notifications")),
+      appBar: AppBar(
+        title: const Text("Notifications"),
+        backgroundColor: Colors.deepOrange.shade600,
+        elevation: 4,
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           _loadNotifications();
-          await _notifications; // wait until data loads
+          await _notifications;
         },
         child: FutureBuilder<List<dynamic>>(
           future: _notifications,
@@ -68,14 +73,35 @@ class _NotificationsPageState extends State<NotificationsPage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(child: Text("Error: ${snapshot.error}"));
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    "Error loading notifications:\n${snapshot.error}",
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              );
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text("No notifications yet"));
+              return Center(
+                child: Text(
+                  "You don't have any notifications yet.",
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: Colors.grey.shade600,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              );
             }
 
             final notifs = snapshot.data!;
             return ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(vertical: 12),
               itemCount: notifs.length,
               itemBuilder: (context, index) {
                 final notif = notifs[index];
@@ -86,26 +112,52 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       ).format(DateTime.parse(createdAt))
                     : "";
 
-                return Card(
-                  color: _getColor(notif["type"]).withOpacity(0.1),
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
+                final color = _getColor(notif["type"]);
+                final icon = _getIcon(notif["type"]);
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
                     vertical: 6,
                   ),
-                  child: ListTile(
-                    leading: Icon(
-                      _getIcon(notif["type"]),
-                      color: _getColor(notif["type"]),
-                      size: 32,
-                    ),
-                    title: Text(
-                      notif["message"] ?? "No message",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: _getColor(notif["type"]),
+                  child: Material(
+                    elevation: 3,
+                    borderRadius: BorderRadius.circular(14),
+                    color: color.withOpacity(0.08),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor: color.withOpacity(0.2),
+                        child: Icon(icon, color: color, size: 26),
+                      ),
+                      title: Text(
+                        notif["message"] ?? "No message",
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: color,
+                        ),
+                      ),
+                      subtitle: Row(
+                        children: [
+                          const Icon(
+                            Icons.access_time_rounded,
+                            size: 14,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            formattedDate,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    subtitle: Text(formattedDate),
                   ),
                 );
               },

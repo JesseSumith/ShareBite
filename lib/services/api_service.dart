@@ -334,4 +334,20 @@ class ApiService {
       print("Path param attempt failed: $e");
     }
   }
+
+  Future<Map<String, dynamic>> getUserProfile(String token, int userId) async {
+    final response = await http.get(
+      Uri.parse("$baseUrl/ShareBite/users/$userId"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load user profile: ${response.body}");
+    }
+  }
 }
